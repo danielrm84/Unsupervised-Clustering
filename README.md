@@ -12,6 +12,6 @@ Learning goals:
 By the end of the course, the student is able to
 
 - import and prepare data in R for clustering analysis
-- use the K-means model and interpret is results
+- use the K-means model and interpret its results
 - apply a DFA to the data and interpret the results
 - plot and visualize data
