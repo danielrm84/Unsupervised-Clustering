@@ -7,7 +7,7 @@
 #		    clusters is selected automatically according to
 #		    two alternative methods decided by the user:
 #
-#		    1) Silhuette score (default method)
+#		    1) Silhouette score (default method)
 #		    2) Knee method (as in DeepSqueak)
 #
 # author:	Daniel Romero Mujalli
