@@ -7,7 +7,7 @@
 #		    clusters is selected automatically according to
 #		    two alternative methods decided by the user:
 #
-#		    1) Silluette score (default method)
+#		    1) Silhuette score (default method)
 #		    2) Knee method (as in DeepSqueak)
 #
 # author:	Daniel Romero Mujalli
@@ -59,7 +59,7 @@
 #			that the data has already been prepared for the 
 #			Kmeans model
 #
-# decision.method: whether "sillhouette" (default) or "knee" method
+# decision.method: whether "silhouette" (default) or "knee" method
 #
 # plot.pca: whether to perform a pca plot colored by the k clusters
 #
@@ -85,7 +85,7 @@ KmeansElbow <- function(x
 				,max.clusters = 10
 				,nstars = 10
 				,scaling.method = "na"
-				,decision.method = "sillhouette"
+				,decision.method = "silhouette"
 				,plot.pca = TRUE)
 {
 #------------------		check arguments		----------------#
@@ -112,7 +112,7 @@ KmeansElbow <- function(x
 
 	# check the decision method
 	if(substr(decision.method, start = 1, stop = 3) == "sil")
-	{ decision.method = "sillhouette" }
+	{ decision.method = "silhouette" }
 	else if (decision.method == "knee")
 	{ decision.method = "knee" }
 	else 
@@ -150,7 +150,7 @@ KmeansElbow <- function(x
 	sse <- vector()
 	
 	# silhouette score vector
-	if(decision.method == "sillhouette")
+	if(decision.method == "silhouette")
 	{ silh.score <- vector() }
 
 	
@@ -181,7 +181,7 @@ KmeansElbow <- function(x
 		    )
 
 		
-		if(decision.method == "sillhouette")
+		if(decision.method == "silhouette")
 		{
 			# compute silhouette score for each number of cluster i
 			# based on https://medium.com/codesmart/
@@ -196,7 +196,7 @@ KmeansElbow <- function(x
 			lines(silh.score, type = "o", lwd = 2, col = "grey")
 
 			# EXPERIMENTAL
-			# Sillh. score can be biased to first order cluster 
+			# Silh. score can be biased to first order cluster 
 			# separation. Subclusters are typically missed. Thus, 
 			# one could try the greater the number of clusters, 
 			# the more the ballast 	
@@ -221,7 +221,7 @@ KmeansElbow <- function(x
 	# knee method selects the elbow (knee) of the plot as the
 	# interception of two lines at the selected knee that minimize 
 	# the sse
-	if( decision.method == "sillhouette" )
+	if( decision.method == "silhouette" )
 	{
 		opt <- which(silh.score == max(silh.score, na.rm = TRUE))
 		#print(silh.score[opt])
