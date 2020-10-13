@@ -62,12 +62,25 @@ df <- read.csv("data_example.csv", header = TRUE)
 
 head(df) # it is already standardized
 
+# Important! standardize your data / feature scaling
+# before the analysis
+
 #-------------------------------------------------#
 
 ####	     STEP 2: TRAIN TEST SPLIT		     ####
 
+# linear discriminant analysis lda
+# target variable (i.e., groups or classes)
+# attach column with categories from the original 
+# data frame (here called df_bup) to the standardized
+# numerical df
+label <- bup$Individual # in case, your predicted class are 
+			 	# individuals (this is an example)
+
+df <- cbind(label,df)
+
 # train test split
-training <- createDataPartition(df[,1]    # a vector to perform the split
+training <- createDataPartition(label    # a vector to perform the split
 					 ,times = 1 # how many splits?
 					 ,list = FALSE# return results in matrix
 					 , p = 0.8    # 80% of data goes to training set
@@ -86,10 +99,6 @@ print(dim(df)[1] * 0.8 ) # 80% of df size
 #-------------------------------------------------#
 
 ####	     STEP 3: BUILD THE MODEL		     ####
-
-# linear discriminant analysis lda
-# target variable (i.e., groups or classes)
-# df["label"]
 
 # explanatory variables X1, ... , Xn
 # are the features (columns) in df
@@ -116,6 +125,10 @@ ldahist(predictions$x[,1], g = df_train$label)
 # second discriminant
 ldahist(predictions$x[,2], g = df_train$label)
 
+# Hint: # If the histograms are not overlapping,
+# means a good separation was achieved by that
+# given discriminant function for those non-overlapping
+# classes / labels / or categories
 #-------------------------------------------------#
 
 ####	     STEP 4: TEST THE MODEL		     ####
