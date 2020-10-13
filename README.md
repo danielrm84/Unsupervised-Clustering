@@ -5,7 +5,7 @@ email: danielrm84@gmail.com
 institute: Tierärztliche Hochschule Hannover, DE
 
 
-This repository a custom R function to automatically find the optimal number of clusters based on the k-means model.
+This repository contains a custom R function to automatically find the optimal number of clusters based on the k-means model.
 
 In addition, it has the material used for an introductory course on clustering using R. 
 Learning goals:
