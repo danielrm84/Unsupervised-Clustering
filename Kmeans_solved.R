@@ -36,16 +36,23 @@
 getwd() # current working directory (wd)
 
 setwd("new_address") # set new working directory
+list.files() # files in directory
+
+file.edit("name") # open a script
+
+
+# if recovering a working space
+ls() # check the current objects
 
 #-------------------------------------------------#
 
 ####	     STEP 1: DATA PREPARATION		     ####
 
 # Import data
-df <- read.csv("data/Mmurinus_repertoire.csv"
-		  , sep = ";"
-		  , header = TRUE
-		  )
+#df <- read.csv("data.csv"
+#		  , sep = ";"
+#		  , header = TRUE
+#		  )
 
 # let's look at the data
 head(df) # overview of first rows
@@ -61,7 +68,11 @@ str(df)  # column names and data types
 # select relevant columns
 df_bkup <- df # a backup, just in case
 
-df <- df[,-c(1:6)]
+#df <- df[,-c(1:6)]
+# a more general way to select numerical columns
+selection <- unlist(lapply(df, is.numeric))
+
+df <- df[, selection]
 
 # It is important to decide what to do with the missing
 # values
@@ -180,13 +191,13 @@ write.csv(df_new
 # separated clusters are. It is a bit conservative
 
 km = KmeansElbow(df 
-		     ,rep = 100
+		     ,rep = 500
 		     ,max.clusters = 100
-		     ,nstars = 100
-		     ,scaling.method = "na"
-		     ,decision.method = "knee"
+		     ,nstarts = 100
+		     ,scaling.method = "z-score" #
+		     ,decision.method = "knee"#"sillhouette"
 		     ,plot.pca = TRUE)
 
 # save clustering plot
-rgl.snapshot(filename = "my_clusters.png") # you can change the extension
+rgl.snapshot(filename = "etary_clusters_R.png") # you can change the extension
 

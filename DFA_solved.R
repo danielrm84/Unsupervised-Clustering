@@ -8,6 +8,15 @@
 #	This script performs a discriminant analysis
 #	(DFA) on the data
 #
+#	Linear discriminant analysis (LDA): Uses linear 
+#	combinations of predictors to predict the class 
+#	of a given observation. Assumes that the 
+#	predictor variables (p) are normally distributed
+#	and the classes have identical variances 
+#	(for univariate analysis, p = 1) or identical 
+#	covariance matrices (for multivariate analysis,
+#	p > 1).
+#
 #	DFA generates a linear combination of variables
 #	that maximizes the probability of correctly
 #	assigning observations to their pre-determined
@@ -74,9 +83,30 @@ head(df) # it is already standardized
 # attach column with categories from the original 
 # data frame (here called df_bup) to the standardized
 # numerical df
+
+# read data
+df <- read.csv("alexandra.csv", sep = ";", header = TRUE)
+
+# do a backup
+bup <- df
+
+# select only numerical columns
+selection <- unlist(lapply(df, is.numeric))
+df <- df[,selection] # only selected numerical columns
+
+# remove call index and individual categories
+df <- df[,-c(1,2)]
+
+# standardize data
+for (i in dim(df)[2]) # number of features (many possibilities)
+{
+	df[,i] <- ( df[,i] - mean(df[,i]) ) / sd(df[,i])
+}
+
 label <- bup$Individual # in case, your predicted class are 
 			 	# individuals (this is an example)
 
+# attach categorical column to df
 df <- cbind(label,df)
 
 # train test split
@@ -114,12 +144,27 @@ print(model)
 # the proportion of trace is the percentage separation 
 # achieved by each discriminant function
 
+# Variable selection:
+# Note that, if the predictor variables are standardized 
+# before computing LDA, the discriminator weights can be 
+# used as measures of variable importance for feature selection.
+#----------------
+
 # let us check the ability of each discriminant 
 # function separating / classifying the data
 
 predictions = predict(model)
 
-# first discriminant
+# The predict() function returns the following elements:
+# class: predicted classes of observations.
+# posterior: is a matrix whose columns are the groups, 
+# rows are the individuals and values are the posterior 
+# probability that the corresponding observation belongs 
+# to the groups.
+# x: contains the linear discriminants, described above
+
+
+# plot only first discriminant function:
 ldahist(predictions$x[,1], g = df_train$label)
 
 # second discriminant
@@ -129,6 +174,64 @@ ldahist(predictions$x[,2], g = df_train$label)
 # means a good separation was achieved by that
 # given discriminant function for those non-overlapping
 # classes / labels / or categories
+
+# scatter plot:
+# Two possibilities: 
+# 1) 2d plot using first two discriminant 
+#    functions (LD1 and LD2)
+#
+# 2) 3d plot, using the first three 
+
+# # get the scores of each function (see head(predictions$x) )
+x = predictions$x[,1]	# LD1
+y = predictions$x[,2]	# LD2
+z = predictions$x[,3]	# LD3
+
+# custom color palette: five classes, five colors 
+# (you can change this!. Check google "R colors", under images tab)
+mypal <- c("black", "magenta3", "blue", "red", "sienna")
+
+# plotting first and second discriminant functions
+plot(x, y      
+    ,col = mypal[as.factor(df_train$label)]
+    ,pch = 16 # filled circles. There are more shapes, ask google!
+    ,main = "DFA, scatter plot"
+    ,xlab = "Score, First Discriminant Function"
+    ,ylab = "Score, Second Discrimiinant Function"
+    )
+
+# add legend:
+legend(x = "topright"
+	, legend = levels(as.factor(df_train$label)) 
+	, col = mypal
+	, pch = c(16)
+ 	#, bty = "n" # no box lines (only if you want)
+	)
+#-----------------
+# 3d scatter plot:
+# does not display for me in linux
+library(rgl)# 3d plot
+
+plot3d(x, y, z
+	,type = "s"
+	,size = 1 
+	,lit = TRUE
+	,box = FALSE	   # no box   
+	#,col = df_test$label # color according to categories 
+	)
+
+# save clustering plot
+rgl.snapshot(filename = "alexandra_scatter3d.png")
+#-----------------
+
+# plot the first three discriminant functions:
+
+# scatterplot3d
+library(scatterplot3d)
+scatterplot3d(x,y,z
+			 ,mypal[as.factor(df_train$label)]
+			 )
+#------------------
 #-------------------------------------------------#
 
 ####	     STEP 4: TEST THE MODEL		     ####
@@ -179,3 +282,13 @@ mean(predictions$class==df_test$label)
 # If all you care for is the classification per se, and that after 
 # training your model on half of the data and testing it on the other 
 # half you get 85-95% accuracy I'd say it is fine.
+
+#--------------
+# && # returns only one value, either true or false
+# &  # a vector
+# if(0){
+#	dummy <- c(1, 2, 3)
+#	dummy == 1
+#	dummy == 1 &  dummy == 2
+#	dummy == 1 && dummy == 2
+#}

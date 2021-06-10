@@ -15,12 +15,18 @@
 ###############################################################
 
 # REQUIRED LIBRARIES
+# install.packages("package_name", repos="http://cran.r-project.org")
+
+# using Linux terminal:
+# sudo apt-get update -y
+# sudo apt-get install -y r-cran-packagename (e.g., ... r-cran-rgl)
+
  library(stats) # kmeans model
  library(cluster) # silhouette coefficient function
- library(ggplot2)
- library(FactoMineR)
- library(factoextra)
- library(rgl) # 3d plots
+ library(ggplot2) # creation of graphics based on "The Grammar of graphics"
+ library(FactoMineR) # PCA
+ library(factoextra) # visualize PCA output
+ library(rgl) # 3d plots + snapshots
  library(BBmisc)# normalize() function
  library(e1071) # sigmoid function
  library(car) # scatter3d plot
@@ -44,12 +50,12 @@
 #	 
 # max.clusters: maximum number of clusters allow
 #
-# nstars: how many random sets should be chosen? For example,
+# nstarts: how many random sets should be chosen? For example,
 #	    when finding k clusters, the model initially randomly
 #	    selects k data points from x to conform the inital
 #	    clusters. This parameter specifies how many times the
 #	    model should perform this random selection. It is 
-#	    recommended to use nstars > 1. This is different to 
+#	    recommended to use nstarts > 1. This is different to 
 #	    the parameter rep (see above)
 #	    
 #
@@ -83,7 +89,7 @@
 KmeansElbow <- function(x 
 				,rep = 10
 				,max.clusters = 10
-				,nstars = 10
+				,nstarts = 10
 				,scaling.method = "na"
 				,decision.method = "silhouette"
 				,plot.pca = TRUE)
@@ -159,7 +165,7 @@ KmeansElbow <- function(x
 	{
 		cluster <- kmeans(x, centers = i, iter.max = rep 
 				     ,algorithm = "Hartigan-Wong"    
-				     ,nstart = nstars)
+				     ,nstart = nstarts)
 		
 		# plot elbow method
 		
@@ -245,7 +251,7 @@ KmeansElbow <- function(x
 	# prepare and return the kmeans object 
 	km <- kmeans(x, centers = opt, iter.max = rep
 			,algorithm = "Hartigan-Wong"    
-		  	,nstart = nstars
+		  	,nstart = nstarts
 			)
  
 	if(plot.pca == TRUE){ plot.pca(x, km$cluster) }
