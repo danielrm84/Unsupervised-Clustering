@@ -98,12 +98,12 @@ df <- df[,selection] # only selected numerical columns
 df <- df[,-c(1,2)]
 
 # standardize data
-for (i in dim(df)[2]) # number of features (many possibilities)
+for (i in 1:dim(df)[2]) # number of features (many possibilities)
 {
 	df[,i] <- ( df[,i] - mean(df[,i]) ) / sd(df[,i])
 }
 
-label <- bup$Individual # in case, your predicted class are 
+label <- bup$location # in case, your predicted class are 
 			 	# individuals (this is an example)
 
 # attach categorical column to df
@@ -201,7 +201,7 @@ plot(x, y
     )
 
 # add legend:
-legend(x = "topright"
+legend(x = "bottomright"
 	, legend = levels(as.factor(df_train$label)) 
 	, col = mypal
 	, pch = c(16)
