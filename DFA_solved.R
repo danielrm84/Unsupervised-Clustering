@@ -189,7 +189,7 @@ z = predictions$x[,3]	# LD3
 
 # custom color palette: five classes, five colors 
 # (you can change this!. Check google "R colors", under images tab)
-mypal <- c("black", "magenta3", "blue", "red", "sienna")
+mypal <- c("black", "lightgrey", "blue", "red", "sienna")
 
 # plotting first and second discriminant functions
 plot(x, y      

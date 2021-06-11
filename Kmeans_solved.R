@@ -79,6 +79,9 @@ df <- df[, selection]
 # In this case, we omit them
 # df <- na.omit(df)
 
+# are there nas?
+dim(df_bkup) == dim(df)
+
 head(df) # new data frame
 
 # Question: are we done? or is there left to do
@@ -199,5 +202,6 @@ km = KmeansElbow(df
 		     ,plot.pca = TRUE)
 
 # save clustering plot
-rgl.snapshot(filename = "etary_clusters_R.png") # you can change the extension
+rgl.snapshot(filename = "clusters_per_location.png") 
+# you can change the extension
 
