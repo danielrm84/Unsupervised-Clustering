@@ -12,25 +12,30 @@
 #
 # author:	Daniel Romero Mujalli
 # email:	danielrm84@gmail.com
+#
+#
+# last update: 20_04_2022
 ###############################################################
 
-# REQUIRED LIBRARIES
-# install.packages("package_name", repos="http://cran.r-project.org")
+# REQUIRED PACKAGES
+pkgs <- c(
+ "stats" 	  # kmeans model
+,"cluster" 	  # silhouette coefficient function
+#,"ggplot2"    # creation of graphics based on "The Grammar of graphics"
+,"FactoMineR" # PCA
+,"factoextra" # visualize PCA output
+,"rgl" 	  # 3d plots + snapshots
+#,"e1071" 	  # sigmoid function
+#,"car" 	  # scatter3d plot
+)
 
-# using Linux terminal:
-# sudo apt-get update -y
-# sudo apt-get install -y r-cran-packagename (e.g., ... r-cran-rgl)
-
- library(stats) # kmeans model
- library(cluster) # silhouette coefficient function
- library(ggplot2) # creation of graphics based on "The Grammar of graphics"
- library(FactoMineR) # PCA
- library(factoextra) # visualize PCA output
- library(rgl) # 3d plots + snapshots
- library(BBmisc)# normalize() function
- library(e1071) # sigmoid function
- library(car) # scatter3d plot
-
+# check if pkg is missing
+available <- pkgs %in% row.names(installed.packages())
+if(sum(available) > 0)
+{
+	message("list of missing packages:")
+	print(pkgs[!available])
+}
 
 
 ###############################################################
@@ -129,17 +134,6 @@ KmeansElbow <- function(x
 	
 #------------------	   end checking arguments	----------------#
 
-#---------------	load required libraries if not done already --------#
-	
-	my.packages <- tolower(library()$results) # convert to lower case
-	
-	# check package "stats", used for kmeans model
-	if(!"stats" %in% my.packages) { library(stats) }
-	# check package "cluster" used for silhouette coefficient function
-	if(!"cluster" %in% my.packages) { library(cluster) }
-
-#------------------  	   end loading libraries 	----------------#
-
 #------------------  	     adjust plot area 		----------------#
 
 	# force to have only one plot per window
@@ -163,9 +157,12 @@ KmeansElbow <- function(x
 	# iterative loop
 	for (i in 1:max.clusters)
 	{
-		cluster <- kmeans(x, centers = i, iter.max = rep 
-				     ,algorithm = "Hartigan-Wong"    
-				     ,nstart = nstarts)
+		cluster <- stats::kmeans(x
+						,centers = i
+					      ,iter.max = rep 
+				     		,algorithm = "Hartigan-Wong"    
+				     		,nstart = nstarts
+						)
 		
 		# plot elbow method
 		
@@ -178,12 +175,13 @@ KmeansElbow <- function(x
 		sse[i] <- cluster$tot.withinss / cluster$totss
 		#DEBUG
 		#print(sse)
-		plot(sse, las = 1, type = "l", lwd = 3, col = "deepskyblue"
-		     #, xlim = c(0, i + window)
-		     , ylim = c(0, 1)
-		     , ylab = "SSE within / total SSE"
-		     , xlab = "Nr of clusters"
-		     , main = "Elbow method"
+		plot(sse, las = 1, type = "l", lwd = 3
+		    ,col = "deepskyblue"
+		    #, xlim = c(0, i + window)
+		    ,ylim = c(0, 1)
+		    ,ylab = "SSE within / total SSE"
+		    ,xlab = "Nr of clusters"
+		    ,main = "Elbow method"
 		    )
 
 		
@@ -193,7 +191,9 @@ KmeansElbow <- function(x
 			# based on https://medium.com/codesmart/
 			# r-series-k-means-clustering-silhouette-794774b46586
 			
-			silh.object <- silhouette(cluster$cluster, dist(x))
+			silh.object <- cluster::silhouette(cluster$cluster
+								    ,dist(x)
+								    )
 			if(i > 1)# details in documentation
 			{ silh.score[i] <- mean(silh.object[, 3]) }
 			else { silh.score[i] <- NA } 
@@ -205,9 +205,7 @@ KmeansElbow <- function(x
 			# Silh. score can be biased to first order cluster 
 			# separation. Subclusters are typically missed. Thus, 
 			# one could try the greater the number of clusters, 
-			# the more the ballast 	
-			#if(i > 1 )
-			#{ silh.score[i] <- silh.score[i] / exp(i / max.clusters) }
+			# the more the ballast
 
 		}
 		
@@ -216,8 +214,6 @@ KmeansElbow <- function(x
 		# time interval
 		Sys.sleep(.09)
 		
-				
-
 	} # end of for loop
 	
 	# set the optimal number of clusters according to the
@@ -249,7 +245,7 @@ KmeansElbow <- function(x
 	    )
 	
 	# prepare and return the kmeans object 
-	km <- kmeans(x, centers = opt, iter.max = rep
+	km <- stats::kmeans(x, centers = opt, iter.max = rep
 			,algorithm = "Hartigan-Wong"    
 		  	,nstart = nstarts
 			)
@@ -267,51 +263,48 @@ KmeansElbow <- function(x
 
 
 ###############################################################
-####			LOAD LIBRARIES PCA			#########
+####		     PCA PLOT, DATA DISTRIBUTION		#########
 
-#install packages
-#install.packages("ggplot2")
-#install.packages("FactoMineR")
-#install.packages("factoextra")
-#install.packages("rgl")# 3d plot
-#install.packages("BBmisc") # normalize() function
-#install.packages("e1071") # sigmoid function
-#install.packages("car") # library(car) # scatter3d plot
+get_pca_components <- function(df)
+{
+	df.pca <- FactoMineR::PCA(df
+					 ,scale.unit = FALSE
+					 ,ncp = 5
+					 ,graph = FALSE
+					 )
 
 
-####		    END LOADING LIBRARIES PCA			#########
+	#get list of pca info:
+	list.pca <- factoextra::get_pca_ind(df.pca)
+	# check coordinates of the componentes (at all dimensions)
+	head(list.pca$coord)
+
+	# store the number of dimensions (i.e., nr of principal components)
+	ndim <- length(list.pca$coord[1,])
+
+	# store component's coordinates as data frame
+	return (as.data.frame(list.pca$coord[,1:ndim]))
+
+}
+
+####		    		END OF PCA PLOT			#########
 ###############################################################
+
+
 ###############################################################
 ####		     PCA PLOT, DATA DISTRIBUTION		#########
 
 plot.pca <- function(df, clusters)
 {
-#---------------	load required libraries if not done already --------#
-	
-	my.packages <- tolower(library()$results) # convert to lower case
-	
-	# check package "ggplot2"	
-	if(!"ggplot2" %in% my.packages) { library(ggplot2) }
-	# check package "FactoMineR" used for PCA visualization, description
-	if(!"factominer" %in% my.packages) { library(factominer) }
-	# check package "factoextra" easy plot multivariate analysis	
-	if(!"factoextra" %in% my.packages) { library(factoextra) }
-	# check package "rgl" 3d plot	
-	if(!"rgl" %in% my.packages) { library(rgl) }
-	# check package "BBmisc" normalize function	
-	if(!"BBmisc" %in% my.packages) { library(BBmisc) }
-	# check package "e1071": sigmoid function	
-	if(!"e1071" %in% my.packages) { library(e1071) }
-
-#------------------  	   end loading libraries 	----------------#
-
-
-
-	df.pca <- PCA(df, scale.unit = FALSE, ncp = 5, graph = FALSE)
+	df.pca <- FactoMineR::PCA(df
+					 ,scale.unit = FALSE
+					 ,ncp = 5
+					 ,graph = FALSE
+					 )
 
 
 	#get list of pca info:
-	list.pca <- get_pca_ind(df.pca)
+	list.pca <- factoextra::get_pca_ind(df.pca)
 	# check coordinates of the componentes (at all dimensions)
 	head(list.pca$coord)
 
@@ -338,7 +331,7 @@ plot.pca <- function(df, clusters)
 	   df.pca$eig[2,3] < 90) # less than 90% variation	
 	{ # 3d plot
 	  z <- df.pca.plot$Dim.3 # princpl. component 3
-	  plot3d(x, y, z, type = "s", size = 1, lit = TRUE, box = FALSE
+	  rgl::plot3d(x, y, z, type = "s", size = 1, lit = TRUE, box = FALSE
 		  , col = clusters 
 		  )
 	}
